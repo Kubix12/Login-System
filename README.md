@@ -2,7 +2,7 @@
 
 ## Architecture
 
-![Screenshot](diagram.png)
+![Screenshot](https://github.com/Kubix12/Login-System/blob/main/password_validator/diagram.png)
 
 ## Description
 
