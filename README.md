@@ -2,7 +2,7 @@
 
 ## Architecture
 
-![Image](C:/Users/banas/Downloads/diagram.png)
+![Screenshot](diagram.png)
 
 ## Description
 
