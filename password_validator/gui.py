@@ -17,7 +17,7 @@ text_password.pack()
 password_entry = Entry(root, bg='black', fg='azure')
 password_entry.pack()
 button_password = Button(text="validate", bg='azure2',
-                         command=lambda: Login.validate_data(login_entry.get(), password_entry.get()))
+                         command=lambda: Login().validate_data(login_entry.get(), password_entry.get()))
 button_password.pack()
 
 root.mainloop()
