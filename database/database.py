@@ -1,5 +1,6 @@
 import psycopg2
 import bcrypt
+from password_validator.hashpassword import Login
 
 
 class Database:
@@ -17,10 +18,17 @@ class Database:
         conn = psycopg2.connect(dbname=self.database_name, user=self.database_user, password=self.database_password,
                                 host=self.database_host, port=self.database_port)
         cur = conn.cursor()
-        cur.execute("CREATE TABLE IF NOT EXISTS users(ID SERIAL PRIMARY KEY, LOGIN TEXT, PASSWORD TEXT);")
-        print('Table created')
-        conn.commit()
-        conn.close()
+        query = (f"SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name "
+                 f"= %s);")
+        cur.execute(query, ('users',))
+        result_tables = cur.fetchone()[0]
+        if result_tables:
+            print('table exists')
+        else:
+            cur.execute("CREATE TABLE IF NOT EXISTS users(ID SERIAL PRIMARY KEY, LOGIN TEXT, PASSWORD TEXT);")
+            print('create table')
+            conn.commit()
+            conn.close()
 
     def insert_data(self, login, user_password):
         """insert_data function inserts data into existing table
@@ -43,6 +51,7 @@ class Database:
         :return: True if login and password exists in table and user can log in into application
         False if login and password doesn't exist in table and user can only register and then log in
         """
+
         conn = psycopg2.connect(dbname=self.database_name, user=self.database_user, password=self.database_password,
                                 host=self.database_host, port=self.database_port)
         cur = conn.cursor()
@@ -51,23 +60,24 @@ class Database:
         result = cur.fetchone()
         count = result[0]
         if count == 1:
-            query = f'SELECT password FROM users WHERE login= %s;'
+            query = 'SELECT password FROM users WHERE login = %s;'
             cur.execute(query, (login,))
-            result_1 = cur.fetchone()[0]
+            hashed_password_from_db = cur.fetchone()[0]
             conn.close()
 
+            # Hash the provided password using the same salt as the stored password
             bytes_password = user_password.encode('utf-8')
-            result_1_bytes = result_1.encode('utf-8')
-            if bcrypt.checkpw(bytes_password, result_1_bytes):
-                print('login successfully')
-                return True
+            hashed_password_new = bcrypt.hashpw(bytes_password, hashed_password_from_db.encode('utf-8'))
 
+            # Compare the newly hashed password with the stored hashed password
+            if hashed_password_new == hashed_password_from_db.encode('utf-8'):
+                print('Passwords match!')
+                return True
             else:
-                print('Incorrect password')
+                print('Passwords do not match.')
                 return False
         else:
-            self.insert_data(login, user_password)
-            return False
+            self.insert_data(login, Login.validate_password(user_password))
 
 
 # Database setting
