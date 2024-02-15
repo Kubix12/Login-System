@@ -5,12 +5,11 @@ from database.database import Database
 class Login:
 
     @staticmethod
-    def validate_data(login, password):
-        if len(login) == 0 or len(password) == 0:
+    def validate_data(login: str, user_password):
+        if len(login) == 0 or len(user_password) == 0:
             pass
         else:
-            login_check = Login.validate_login(login)
-            password_check = Login.validate_password(password)
+            password_check = Login.validate_password(user_password)
             # Database setting
             name = 'demo'
             user = 'postgres'
@@ -20,7 +19,7 @@ class Login:
             db = Database(database_name=name, database_user=user,
                           database_password=password, database_host=host,
                           database_port=port)
-            db.search_data(login_check, password_check)
+            db.search_data(login, password_check)
 
     @staticmethod
     def validate_password(password: str) -> str:
@@ -28,10 +27,3 @@ class Login:
         salt_password = bcrypt.gensalt()
         hash_password = bcrypt.hashpw(bytes_password, salt_password)
         return hash_password.decode('utf-8')
-
-    @staticmethod
-    def validate_login(login: str) -> str:
-        bytes_login = login.encode('utf-8')
-        salt_login = bcrypt.gensalt()
-        hash_login = bcrypt.hashpw(bytes_login, salt_login)
-        return hash_login.decode('utf-8')
