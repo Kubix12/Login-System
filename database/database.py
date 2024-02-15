@@ -1,4 +1,5 @@
 import psycopg2
+import bcrypt
 
 
 class Database:
@@ -29,13 +30,13 @@ class Database:
         conn = psycopg2.connect(dbname=self.database_name, user=self.database_user, password=self.database_password,
                                 host=self.database_host, port=self.database_port)
         cur = conn.cursor()
-        query = f'INSERT INTO users{login, user_password} VALUES (%s, %s);'
+        query = f'INSERT INTO users(login, password) VALUES (%s, %s);'
         cur.execute(query, (login, user_password))
         print("Data inserted successfully")
         conn.commit()
         conn.close()
 
-    def search_data(self, login, user_password):
+    def search_data(self, login: str, user_password: str) -> object:
         """search_data function checks that login and password already exists in table
         :param login:
         :param user_password:
@@ -45,13 +46,25 @@ class Database:
         conn = psycopg2.connect(dbname=self.database_name, user=self.database_user, password=self.database_password,
                                 host=self.database_host, port=self.database_port)
         cur = conn.cursor()
-        query = f'SELECT COUNT(*) FROM users WHERE LOGIN = %s and PASSWORD = %s'
-        cur.execute(query, (login, user_password))
+        query = f'SELECT COUNT(*) FROM users WHERE login= %s;'
+        cur.execute(query, (login,))
         result = cur.fetchone()
         count = result[0]
-        conn.close()
-        if count > 0:
-            return True
+        if count == 1:
+            query = f'SELECT password FROM users WHERE login= %s;'
+            cur.execute(query, (login,))
+            result_1 = cur.fetchone()[0]
+            conn.close()
+
+            bytes_password = user_password.encode('utf-8')
+            result_1_bytes = result_1.encode('utf-8')
+            if bcrypt.checkpw(bytes_password, result_1_bytes):
+                print('login successfully')
+                return True
+
+            else:
+                print('Incorrect password')
+                return False
         else:
             self.insert_data(login, user_password)
             return False
