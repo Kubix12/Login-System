@@ -1,4 +1,3 @@
-from tkinter import *
 from database.database import Database
 
 root = Tk()
