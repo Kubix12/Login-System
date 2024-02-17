@@ -1,4 +1,5 @@
 from database.database import Database
+from tkinter import Tk, Label, Entry, Button
 
 root = Tk()
 root.geometry('300x300')
