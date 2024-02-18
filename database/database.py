@@ -44,7 +44,7 @@ class Database:
         conn.commit()
         conn.close()
 
-    def search_data(self, login: str, user_password: str) -> str:
+    def search_data(self, login, user_password):
         """search_data function checks that login and password already exists in table
         :param login:
         :param user_password:
@@ -59,7 +59,6 @@ class Database:
         cur.execute(query, (login,))
         result = cur.fetchone()
         count = result[0]
-        print(count)
         if count == 1:
             query = 'SELECT password FROM users WHERE login = %s;'
             cur.execute(query, (login,))
@@ -70,11 +69,11 @@ class Database:
             bytes_password = user_password.encode('utf-8')
             hashed_password_new = bcrypt.hashpw(bytes_password, hashed_password_from_db.encode('utf-8'))
 
-            # Compare the newly hashed password with the stored hashed password
-            if hashed_password_new == hashed_password_from_db.encode('utf-8'):
-                print('Passwords match!')
+            if hashed_password_new != hashed_password_from_db.encode('utf-8'):
+                return False
+
             else:
-                print('Passwords do not match.')
+                return True
 
         else:
             self.insert_data(login, Login.validate_password(user_password))
