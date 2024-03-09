@@ -19,6 +19,5 @@ To run this project, install it locally using:
 
 ```
 $ pip install -r requirement.txt
-$ 
-$ 
+$ python gui.py
 ```
